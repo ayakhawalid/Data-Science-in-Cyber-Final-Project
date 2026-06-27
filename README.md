@@ -1,33 +1,22 @@
-# Data Science in Cyber — Final Project
+# Data Science in Cyber - Final Project
+
+**Student:** Aya Khawaled (ID: 214742496)
 
 Critical reproduction and evaluation of **PhreshPhish** (Dalton et al., 2025) for phishing website detection.
 
 ## Project description
 
-This project evaluates whether claims in the PhreshPhish paper are supported by data and experiments. The authors argue that many phishing ML studies report inflated performance due to low-quality data, train–test leakage, and unrealistic class balance. They release a large dataset and benchmark suite with realistic phishing base rates.
+This project evaluates whether claims in the PhreshPhish paper are supported by data and experiments. The authors argue that many phishing ML studies report inflated performance due to low-quality data, train-test leakage, and unrealistic class balance. They release a large dataset and benchmark suite with realistic phishing base rates.
 
-We reproduce a simplified pipeline: URL/HTML feature extraction, exploratory data analysis, and comparison of classical ML models (Logistic Regression, Random Forest).
+We reproduce a simplified pipeline: URL/HTML feature extraction, exploratory data analysis, and comparison of classical ML models (Logistic Regression and Random Forest). We also compare high-prevalence test metrics with a simulated ~1% phishing deployment benchmark.
 
 ## Links
 
 | Resource | URL |
 |----------|-----|
-| **Selected paper** | https://arxiv.org/pdf/2507.10854 |
-| **Original GitHub** | https://github.com/PhreshPhish/phreshphish |
-| **Dataset** | https://huggingface.co/datasets/phreshphish/phreshphish |
-
-## Repository structure
-
-```
-??? README.md
-??? requirements.txt
-??? notebooks/
-?   ??? phreshphish_analysis.ipynb   # Main analysis notebook
-??? src/
-?   ??? features.py                  # URL/HTML feature extraction
-??? report/
-    ??? (final PDF report — add before submission)
-```
+| Selected paper | https://arxiv.org/pdf/2507.10854 |
+| Original GitHub repository | https://github.com/PhreshPhish/phreshphish |
+| This project repository | https://github.com/ayakhawalid/Data-Science-in-Cyber-Final-Project |
 
 ## Execution instructions
 
@@ -37,10 +26,13 @@ We reproduce a simplified pipeline: URL/HTML feature extraction, exploratory dat
 git clone https://github.com/ayakhawalid/Data-Science-in-Cyber-Final-Project.git
 cd Data-Science-in-Cyber-Final-Project
 python -m venv .venv
+
 # Windows
 .venv\Scripts\activate
-# macOS/Linux
+
+# macOS / Linux
 source .venv/bin/activate
+
 pip install -r requirements.txt
 ```
 
@@ -50,29 +42,20 @@ pip install -r requirements.txt
 jupyter notebook notebooks/phreshphish_analysis.ipynb
 ```
 
-Run all cells top to bottom. The first run downloads a **subset** of PhreshPhish from Hugging Face (not the full 36 GB dataset).
+Run all cells from top to bottom. The first run streams a subset of PhreshPhish from Hugging Face and caches features under `data/`. Later runs load from cache unless `FORCE_REBUILD_CACHE = True` in the first notebook cell.
 
-### 3. Configuration
+Main configuration (notebook cell 1): `TRAIN_SAMPLE_SIZE = 5_000`, `TEST_SAMPLE_SIZE = 1_000`, `MAX_HTML_CHARS = 80_000`.
 
-In the notebook, adjust:
+### 3. Report
 
-- `TRAIN_SAMPLE_SIZE` — default `20000`
-- `TEST_SAMPLE_SIZE` — default `5000`
-- `LOW_BASE_RATE` — default `0.01` (1% phishing) for realistic evaluation
+The PDF report is in `report/phreshphish_final_report.pdf`. Supporting code is in `src/features.py` and `src/data_cache.py`.
 
 ## Dataset source
 
-**PhreshPhish** — phishing and benign webpage URL + HTML pairs.
+**PhreshPhish** - phishing and benign webpage URL + HTML pairs.
 
-- Hugging Face: `phreshphish/phreshphish`
+- Hugging Face: https://huggingface.co/datasets/phreshphish/phreshphish
 - Splits: `train`, `test`
 - License: CC BY 4.0 (anti-phishing research only)
 
-## Submission checklist
-
-- [ ] PDF report (English)
-- [ ] Executable notebook
-- [ ] README with links and instructions
-- [ ] Public GitHub repository
-
-**Deadline:** Friday, July 10, 2026, 23:59
+This project uses a streamed subset (5,000 train + 1,000 test rows), not the full ~36 GB dataset.
