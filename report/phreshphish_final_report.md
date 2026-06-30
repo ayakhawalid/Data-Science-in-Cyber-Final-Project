@@ -207,17 +207,24 @@ Best model: **Random Forest** (highest F1).
 
 Random Forest bootstrap at 1%: precision **0.503** [0.374, 0.629]; multi-seed precision **0.496 +/- 0.017**.
 
-### 5.6 Prevalence sweep (Random Forest)
+### 5.6 Prevalence sweep (both models)
 
-| Prevalence | n_pos | Precision | Recall | F1 |
-|------------|-------|-----------|--------|-----|
-| 1% | 34 | 0.508 | 0.941 | 0.660 |
-| 5% | 177 | 0.834 | 0.881 | 0.857 |
-| 10% | 373 | 0.914 | 0.882 | 0.898 |
-| 25% | 453 | 0.928 | 0.883 | 0.905 |
-| 45% | 453 | 0.928 | 0.883 | 0.905 |
+We swept the simulated phishing prevalence for **both** models to confirm the base-rate effect is not specific to Random Forest.
 
-Precision and F1 rise as prevalence increases - direct evidence that **the same model looks "better" on imbalanced-easy tests**.
+| Model | Prevalence | Precision | Recall | F1 | ROC-AUC |
+|-------|------------|-----------|--------|-----|---------|
+| Logistic Regression | 1% | 0.064 | 0.912 | 0.120 | 0.958 |
+| Logistic Regression | 5% | 0.253 | 0.864 | 0.391 | 0.935 |
+| Logistic Regression | 10% | 0.418 | 0.871 | 0.565 | 0.937 |
+| Logistic Regression | 25% | 0.465 | 0.870 | 0.606 | 0.938 |
+| Logistic Regression | 45% | 0.465 | 0.870 | 0.606 | 0.938 |
+| Random Forest | 1% | 0.508 | 0.941 | 0.660 | 0.998 |
+| Random Forest | 5% | 0.834 | 0.881 | 0.857 | 0.993 |
+| Random Forest | 10% | 0.914 | 0.882 | 0.898 | 0.994 |
+| Random Forest | 25% | 0.928 | 0.883 | 0.905 | 0.993 |
+| Random Forest | 45% | 0.928 | 0.883 | 0.905 | 0.993 |
+
+For **both** models, precision and F1 rise as prevalence increases while recall and ROC-AUC stay roughly flat - direct evidence that **the same model looks "better" on imbalanced-easy tests**. The effect is even more severe for the weaker Logistic Regression (precision 0.06 at 1% vs 0.47 at 45%), and Random Forest dominates at every prevalence. This shows the base-rate distortion is a **property of the evaluation prevalence, not of one specific model**.
 
 ### 5.7 Error analysis (Random Forest, test set)
 
@@ -235,7 +242,7 @@ Precision and F1 rise as prevalence increases - direct evidence that **the same 
 1. Random Forest performs well on the **standard test split** (F1 0.91, ROC-AUC 0.97).  
 2. The **same model** at **~1% phishing** drops to **~51% precision** - flagged pages are wrong about half the time at the default threshold.  
 3. **ROC-AUC stays high** (~0.99 at 1%), so the model ranks phishing above benign, but **threshold and prevalence** determine operational precision.  
-4. PhreshPhish's warning about **unrealistic base rates** is **supported** by our reproduction.
+4. The precision/F1 drop at low prevalence appears for **both** models (Logistic Regression and Random Forest), so PhreshPhish's warning about **unrealistic base rates** is **supported** by our reproduction and is not an artifact of a single model.
 
 ### 6.2 Lessons learned
 
