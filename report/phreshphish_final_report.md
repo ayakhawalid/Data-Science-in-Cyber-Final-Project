@@ -12,7 +12,7 @@
 
 This project reproduces a simplified phishing-detection pipeline inspired by PhreshPhish and critically evaluates the authors' central claim: **many published results are misleading because benchmarks use unrealistic phishing prevalence**. We trained Logistic Regression and Random Forest on URL/HTML features extracted from a 5,000-train / 1,000-test subset of the PhreshPhish Hugging Face dataset.
 
-On the official-style test split (~45% phishing), Random Forest achieved **93% precision** and **0.91 F1**. On a simulated **1% phishing** deployment benchmark (test phishing positives + pooled benign rows), precision fell to **51%** (bootstrap 95% CI: 0.37-0.63) while ROC-AUC remained ~0.99. A prevalence sweep (1%-45%) showed precision and F1 rising monotonically as base rate increased.
+On the official-style test split (~45% phishing), Random Forest achieved **93% precision** and **0.905 F1**. On a simulated **1% phishing** deployment benchmark (test phishing positives + pooled benign rows), precision fell to **51%** (bootstrap 95% CI: 0.37-0.63) while ROC-AUC remained ~0.99. A prevalence sweep (1%-45%) showed precision and F1 rising monotonically as base rate increased.
 
 **Conclusion:** Our experiments **support** the authors' argument that high-prevalence evaluation overstates practical usefulness. We did **not** test leakage claims. The reproduction uses a subset and simpler features than the full paper baselines.
 
@@ -68,7 +68,7 @@ We did **not** empirically audit leakage (duplicate URLs across splits, temporal
 
 ### 2.3 Is the evaluation methodology appropriate?
 
-**For the paper's goal:** Yes - separating -easy- high-prevalence tests from rare-phishing benchmarks is appropriate for cybersecurity.
+**For the paper's goal:** Yes - separating "easy" high-prevalence tests from rare-phishing benchmarks is appropriate for cybersecurity.
 
 **For our reproduction:** Partially. We:
 - Used official train/test splits from Hugging Face  
@@ -87,7 +87,7 @@ This is a **reasonable simulation** but not identical to the paper's official lo
 
 ### 2.5 Are conclusions justified?
 
-**Supported by our evidence:** High-prevalence test metrics **overstate precision/F1** relative to a ~1% deployment-like setting. Random Forest precision dropped from **0.93 ? 0.51** (45% relative decrease) with stable multi-seed behavior (precision 0.496 +/- 0.017).
+**Supported by our evidence:** High-prevalence test metrics **overstate precision/F1** relative to a ~1% deployment-like setting. Random Forest precision dropped from **0.93 to 0.51** (45% relative decrease) with stable multi-seed behavior (precision 0.496 +/- 0.017).
 
 **Not contradicted, but not fully replicated:** Leakage critique and full benchmark numbers from the paper.
 
@@ -99,9 +99,9 @@ This is a **reasonable simulation** but not identical to the paper's official lo
 
 Features were engineered in `src/features.py` from raw URL and HTML strings - no categorical encoding was needed (all numeric).
 
-**URL features (12):** length, host/path length, dots, hyphens, digits, subdomains, HTTPS flag, `@` symbol, IP host, suspicious token count (login, verify, bank, etc.).
+**URL features (11):** URL/host/path length, dots, hyphens, digits, subdomains, HTTPS flag, `@` symbol, IP-host flag, suspicious-token count (login, verify, bank, etc.).
 
-**HTML features (7):** length, forms, inputs, password fields, scripts, links, iframes.
+**HTML features (8):** length, forms, inputs, password-input count, password-field flag, scripts, anchor links, iframes.
 
 **Total:** 19 numeric features per row.
 
@@ -119,7 +119,7 @@ No log/Box-Cox transforms were applied; URL lengths are right-skewed but tree mo
 
 ### 3.3 Redundancy analysis
 
-We computed **Pearson** and **Spearman** correlation heatmaps on training features. Pearson assumes linearity; Spearman is more robust to skew and outliers (important for `url_length`). **Kendall ?** for (`url_length`, `num_dots`) was 0.279 (p ? 0.001), indicating a moderate monotonic relationship - longer URLs tend to have more dots (subdomains/path), which is intuitive for phishing clones.
+We computed **Pearson** and **Spearman** correlation heatmaps on training features. Pearson assumes linearity; Spearman is more robust to skew and outliers (important for `url_length`). **Kendall tau** for (`url_length`, `num_dots`) was 0.279 (p < 0.001), indicating a moderate monotonic relationship - longer URLs tend to have more dots (subdomains/path), which is intuitive for phishing clones.
 
 No feature pairs exceeded |r| > 0.9, so no columns were removed.
 
@@ -173,6 +173,8 @@ The notebook `notebooks/phreshphish_analysis.ipynb` runs end-to-end with `requir
 6. Bootstrap (500) and multi-seed (10) stability on 1% benchmark  
 7. Error analysis on Random Forest test predictions  
 
+**Modifications we introduced (vs. the paper):** a reduced 5k/1k streamed subset; 19 hand-crafted features instead of the paper's heavier baselines; a *self-constructed* 1% prevalence benchmark (test-only positives, benign pooled from train+test); a prevalence sweep; and bootstrap + multi-seed robustness checks not present in the original.
+
 ### 5.2 Models
 
 - **Logistic Regression:** `StandardScaler` + `LogisticRegression(class_weight='balanced', max_iter=1000)`  
@@ -183,8 +185,8 @@ The notebook `notebooks/phreshphish_analysis.ipynb` runs end-to-end with `requir
 We report **Accuracy, Precision, Recall, F1, MCC, ROC-AUC** and confusion matrices.
 
 **Cybersecurity interpretation:**
-- **Precision:** Of flagged pages, how many are truly phishing? Low precision ? many legitimate sites blocked (**FP**).  
-- **Recall:** Of true phishing, how many caught? Low recall ? attacks reach users (**FN**).  
+- **Precision:** Of flagged pages, how many are truly phishing? Low precision means many legitimate sites blocked (**FP**).  
+- **Recall:** Of true phishing, how many caught? Low recall means attacks reach users (**FN**).  
 - **ROC-AUC:** Ranking quality across thresholds; can stay high even when precision at default threshold is poor.
 
 ### 5.4 Results - high-prevalence test (~45% phishing)
@@ -215,7 +217,7 @@ Random Forest bootstrap at 1%: precision **0.503** [0.374, 0.629]; multi-seed pr
 | 25% | 453 | 0.928 | 0.883 | 0.905 |
 | 45% | 453 | 0.928 | 0.883 | 0.905 |
 
-Precision and F1 rise as prevalence increases - direct evidence that **the same model looks -better- on imbalanced-easy tests**.
+Precision and F1 rise as prevalence increases - direct evidence that **the same model looks "better" on imbalanced-easy tests**.
 
 ### 5.7 Error analysis (Random Forest, test set)
 
@@ -262,7 +264,7 @@ Precision and F1 rise as prevalence increases - direct evidence that **the same 
 
 ### 6.6 Recommendation
 
-**Yes**, for phishing detection research - PhreshPhish is a valuable reference for **how to evaluate** detectors, not only for raw accuracy on a single split. Practitioners should always ask: *-At what phishing prevalence were these metrics measured?-*
+**Yes**, for phishing detection research - PhreshPhish is a valuable reference for **how to evaluate** detectors, not only for raw accuracy on a single split. Practitioners should always ask: *"At what phishing prevalence were these metrics measured?"*
 
 ---
 
