@@ -16,8 +16,6 @@ We reproduce a simplified pipeline: URL/HTML feature extraction, exploratory dat
 |----------|-----|
 | Selected paper | https://arxiv.org/pdf/2507.10854 |
 | Original GitHub repository | https://github.com/PhreshPhish/phreshphish |
-| Dataset (Hugging Face) | https://huggingface.co/datasets/phreshphish/phreshphish |
-| This project repository | https://github.com/ayakhawalid/Data-Science-in-Cyber-Final-Project |
 
 ## Execution instructions
 
@@ -55,7 +53,7 @@ The PDF report is in `report/phreshphish_final_report.pdf`. Supporting code is i
 
 **PhreshPhish** - phishing and benign webpage URL + HTML pairs.
 
-- Hosted on Hugging Face (link in the **Links** table above)
+- Hugging Face: https://huggingface.co/datasets/phreshphish/phreshphish
 - Splits: `train`, `test`
 - License: CC BY 4.0 (anti-phishing research only)
 
